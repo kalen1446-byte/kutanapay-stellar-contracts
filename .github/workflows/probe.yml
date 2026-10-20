@@ -1,0 +1,22 @@
+name: probe
+
+on: push
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: rustup show && rustup target add wasm32v1-none
+      - name: Lock before
+        run: grep -n -A1 'name = "ed25519-dalek"' Cargo.lock
+      - name: Pin ed25519-dalek to 2.x
+        run: cargo update -p ed25519-dalek@3.0.0 --precise 2.1.1
+      - name: Tests
+        run: cargo test --workspace
+      - name: Build WASM (locked)
+        run: cargo build --release --target wasm32v1-none --workspace --locked
+      - name: Lock diff
+        if: always()
+        run: git --no-pager diff Cargo.lock
