@@ -2,6 +2,9 @@ name: probe
 
 on: push
 
+permissions:
+  contents: write
+
 jobs:
   probe:
     runs-on: ubuntu-latest
@@ -20,3 +23,10 @@ jobs:
       - name: Lock diff
         if: always()
         run: git --no-pager diff Cargo.lock
+      - name: Commit updated lock
+        run: |
+          git config user.name "gelenbedalen-art"
+          git config user.email "gelenbedalen@gmail.com"
+          git add Cargo.lock
+          git commit -m "chore: lock ed25519-dalek 2.1.1 for testutils"
+          git push
